@@ -65,26 +65,44 @@ def split_composed_arguments(string):
 
 def replace_nodes(all_nodes, fast_dict_search):
     """
-    Replace the arguments of the id of neighbour nodes with the neighbour nodes itself. In this way we create archs in the graph.
+    Replace the arguments of the ID of neighbor nodes with the neighbor nodes themselves. 
+    This creates edges in the graph.
+    
     Args:
-        all_nodes: All FlatNodes with id of their neighbour nodes in the parameters fields.
+        all_nodes: List of FlatNodes with IDs of their neighbor nodes in the `parameters` fields.
+        fast_dict_search: Dictionary mapping IDs (e.g., '#1234') to node objects.
     """
+    def normalize_key(key):
+        """Normalize keys by stripping whitespace."""
+        return key.strip() if isinstance(key, str) else key
+
     for node in all_nodes:
         for i1, par1 in enumerate(node.parameters):
             if isinstance(par1, str) and len(par1) > 0 and par1[0] == '#':
-                if "-" not in par1:
-                    node.parameters[i1] = fast_dict_search[par1]
+                key = normalize_key(par1)  # Normalize the key
+                if "-" not in key:  # Check for valid IDs
+                    if key in fast_dict_search:
+                        node.parameters[i1] = fast_dict_search[key]
+                    else:
+                        print(f"Warning: ID '{key}' not found in fast_dict_search")
                 else:
-                    print("Weird id va --- ")
-                # node.parameters[i1] = find_node_by_id(all_nodes, par1)
+                    print(f"Weird ID format: '{key}'")
             elif isinstance(par1, list):
                 for i2, par2 in enumerate(par1):
                     if isinstance(par2, str) and len(par2) > 0 and par2[0] == '#':
-                        node.parameters[i1][i2] = fast_dict_search[par2]
+                        key = normalize_key(par2)  # Normalize the key
+                        if key in fast_dict_search:
+                            node.parameters[i1][i2] = fast_dict_search[key]
+                        else:
+                            print(f"Warning: ID '{key}' not found in fast_dict_search")
                     elif isinstance(par2, list):
                         for i3, par3 in enumerate(par2):
                             if isinstance(par3, str) and len(par3) > 0 and par3[0] == '#':
-                                node.parameters[i1][i2][i3] = fast_dict_search[par3]
+                                key = normalize_key(par3)  # Normalize the key
+                                if key in fast_dict_search:
+                                    node.parameters[i1][i2][i3] = fast_dict_search[key]
+                                else:
+                                    print(f"Warning: ID '{key}' not found in fast_dict_search")
 
 
 def hyphen_split(string, split_word, num_occurance=2):
